@@ -29,9 +29,9 @@ class MyTimeDate:
         self.second = second
         self.weekday = weekday
         self.yearday = yearday
-        print(date)
+        #print(date)
 
     #read local TimeDate
     def readTimeDate(self):
-        print('read MyTimeDate...')
+        #print('read MyTimeDate...')
         return self.hour,self.minute,self.year,self.month,self.mday
