@@ -21,7 +21,7 @@ def start():
 
     #INIT time&date
     date = MyTimeDate()
-
+    dt = date.readTimeDate()
     
     #Begin MAINcode
     seed = Nursery()

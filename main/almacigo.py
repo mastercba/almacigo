@@ -3,6 +3,7 @@
 
 from machine import Pin, I2C
 from time import sleep
+from . import time_date
 
 
 #ESP32 BlueLed Pin
@@ -15,13 +16,15 @@ class Nursery:
         process()
 
 
-#------------------------------------------------       
+#----------------------------------------------------------       
 def process():
     while True:
-        blink_blue_led()
-    
+        blink_blue_led()                               #BBL
+        date = time_date.MyTimeDate()       #read Time&Date
+        dt = date.readTimeDate()
+        print(dt[0],":",dt[1],"/",dt[2],"/",dt[3],"/",dt[4])
 
-#------------------------------------------------        
+#----------------------------------------------------------        
 
 #BlinkBlueLed
 def blink_blue_led():
