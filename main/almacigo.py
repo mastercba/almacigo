@@ -1,5 +1,4 @@
-# almacigo.py  v0.1.2 r1.2
-
+# almacigo.py
 
 
 from machine import Pin, I2C
@@ -12,7 +11,7 @@ led = Pin(13, Pin.OUT, value=0) #BlueLed Pin
 
 class Nursery:
     def __init__(self):
-        print('start NURSERY v0.1.2 r1.2')
+        print('start NURSERY')
         process()
 
 
@@ -24,7 +23,7 @@ def process():
 
 #------------------------------------------------        
 
-#BlinkBlueLed r1.2
+#BlinkBlueLed
 def blink_blue_led():
     led.value(1)
     sleep(0.1)
