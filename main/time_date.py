@@ -17,8 +17,8 @@ class MyTimeDate:
             except:
                 pass
             rtc=machine.RTC()
-            utcNTPtime=utime.time()
-            myTime=utcNTPtime-14400
+            utcNTPtime = utime.time()
+            myTime = utcNTPtime-14400
             (year, month, mday, hour, minute, second, weekday, yearday)= utime.localtime(myTime)
             date = (year, month, mday, hour, minute, second, weekday, yearday)
         self.year = year
@@ -29,9 +29,9 @@ class MyTimeDate:
         self.second = second
         self.weekday = weekday
         self.yearday = yearday
-        #print(date)
+        # print(date)
 
-    #read local TimeDate
+    # read local TimeDate
     def readTimeDate(self):
-        #print('read MyTimeDate...')
+        # print('read MyTimeDate...')
         return self.hour,self.minute,self.year,self.month,self.mday
