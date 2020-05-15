@@ -9,16 +9,18 @@ from . import rutina
 from . import ulcd1602
 
 
-# ESP32BlueLedPin
-led = Pin(13, Pin.OUT, value=0)  # BlueLed Pin
-i2c = I2C(1, sda=Pin(21), scl=Pin(22))
-
-
+# ESP32 Pin Layout
+led = Pin(13, Pin.OUT, value=0)         # BlueLed Pin
+i2c = I2C(1, sda=Pin(21), scl=Pin(22))  # i2c Pin
+lcd = ulcd1602.LCD1602(i2c)             # LCD1602 OBJ
 
 class Nursery:
-    def __init__(self):
-        print('start NURSERY')
-        process()
+    def __init__(self, cv):
+        print('start...')
+        self.cv = cv            # ver1602
+        lcd.puts("v", 12, 1)
+        lcd.puts(self.cv, 13, 1)
+        process()               # main
 
 
 # ----------------------------------------------------------
@@ -27,7 +29,6 @@ def process():
         blink_blue_led()                              # BBL
         date = time_date.MyTimeDate()      # read Time&Date
         dt = date.readTimeDate()
-        #print(dt[0],":",dt[1]," ",dt[2],".",dt[3],".",dt[4])
         if dt[0] == 21 and dt[1] == 0:  # refresh Time&Date
             date = time_date.MyTimeDate()
             dt = date.readTimeDate()
@@ -56,7 +57,6 @@ def newFirmware():
 def print_date_time():
     date = time_date.MyTimeDate()      # read Time&Date
     dt = date.readTimeDate()
-    lcd = ulcd1602.LCD1602(i2c)        # print LCD1602
     if dt[1] < 10:
         lcd.puts(dt[0], 0, 0)
         lcd.puts(":", 2, 0)
