@@ -6,7 +6,7 @@ from time import sleep
 from . import time_date
 from . import ota_updater
 from . import rutina
-from . import mp_i2c_lcd1602
+from . import ulcd1602
 
 
 # ESP32BlueLedPin
@@ -56,18 +56,18 @@ def newFirmware():
 def print_date_time():
     date = time_date.MyTimeDate()      # read Time&Date
     dt = date.readTimeDate()
-    LCD = mp_i2c_lcd1602.LCD1602(i2c)  # print LCD1602
+    lcd = ulcd1602.LCD1602(i2c)        # print LCD1602
     if dt[1] < 10:
-        LCD.puts(dt[0], 0, 0)
-        LCD.puts(":", 2, 0)
-        LCD.puts("0", 3, 0)
-        LCD.puts(dt[1], 4, 0)
+        lcd.puts(dt[0], 0, 0)
+        lcd.puts(":", 2, 0)
+        lcd.puts("0", 3, 0)
+        lcd.puts(dt[1], 4, 0)
     elif dt[0] < 10:
-        LCD.puts("0", 0, 0)
-        LCD.puts(dt[0], 1, 0)
-        LCD.puts(":", 2, 0)
-        LCD.puts(dt[1], 3, 0)
+        lcd.puts("0", 0, 0)
+        lcd.puts(dt[0], 1, 0)
+        lcd.puts(":", 2, 0)
+        lcd.puts(dt[1], 3, 0)
     else:
-        LCD.puts(dt[0], 0, 0)
-        LCD.puts(":", 2, 0)
-        LCD.puts(dt[1], 3, 0)
+        lcd.puts(dt[0], 0, 0)
+        lcd.puts(":", 2, 0)
+        lcd.puts(dt[1], 3, 0)

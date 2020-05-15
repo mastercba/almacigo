@@ -27,6 +27,10 @@ class OTAUpdater:
                 pass
         print('network config:', sta_if.ifconfig())
 
+    def read_current_version(self):
+        read_version = self.get_version(self.modulepath(self.main_dir))
+        return read_version
+
     def check_for_update_to_install_during_next_reboot(self):
         current_version = self.get_version(self.modulepath(self.main_dir))
         latest_version = self.get_latest_version()
