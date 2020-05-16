@@ -7,12 +7,16 @@ from . import time_date
 from . import ota_updater
 from . import rutina
 from . import ulcd1602
+import machine, onewire, ds18x20
 
 
 # ESP32 Pin Layout
-led = Pin(13, Pin.OUT, value=0)         # BlueLed Pin
-i2c = I2C(1, sda=Pin(21), scl=Pin(22))  # i2c Pin
-lcd = ulcd1602.LCD1602(i2c)             # LCD1602 OBJ
+led = Pin(13, Pin.OUT, value=0)                       # BlueLed Pin
+i2c = I2C(1, sda=Pin(21), scl=Pin(22))                # i2c Pin
+lcd = ulcd1602.LCD1602(i2c)                           # LCD1602 OBJ
+ds_pin = machine.Pin(4)                               # DS18b20 Pin
+ds_sensor = ds18x20.DS18X20(onewire.OneWire(ds_pin))  # DS18B20 OBJ
+
 
 class Nursery:
     def __init__(self, cv):
@@ -36,6 +40,7 @@ def process():
         if dt[0] == 4 and dt[1] == 30:
             rt = rutina.Riego()
         print_date_time()               # LCD1602 date&time
+        ds18b20()                    # read&LCD1602 ds18b20
 
 # ----------------------------------------------------------
 
@@ -71,3 +76,20 @@ def print_date_time():
         lcd.puts(dt[0], 0, 0)
         lcd.puts(":", 2, 0)
         lcd.puts(dt[1], 3, 0)
+
+# DS18B20
+def ds18b20():
+    roms = ds_sensor.scan()
+    #print('Found DS devices: ', roms)
+    ds_sensor.convert_temp()
+    #time.sleep_ms(750)
+    for rom in roms:
+      temp = ("%.1f" % round(ds_sensor.read_temp(rom), 1))  
+      #print(rom)
+      #print("%.1f" % round(temp, 2))
+      #print("/")
+      #print(round(temp, 1))
+      #print(ds_sensor.read_temp(rom))
+    #time.sleep(5)
+      lcd.puts(temp, 6, 0)   # ds18b20->lcd1602
+      lcd.puts("C", 10, 0)
