@@ -1,6 +1,9 @@
 # rutina.py
 
 
+from machine import Pin, I2C, PWM
+
+servo = PWM(Pin(2), freq = 50)
 
 
 class Riego:
@@ -14,10 +17,18 @@ def rutinaRiego():
     mezclarTanqueAB()
     dosificaAB()
     mezclarON()
+    mezclarOFF()
 
 # ---------------------------------------------------------
 
+def closeValve():
+    print('cerramos valvula')
+    servo.duty(45)
 
+def openValve():
+    print('abrimos valvula')
+    servo.duty(80)
+    
 def llenarTanque():
     print('llenamos tanque de agua')
 

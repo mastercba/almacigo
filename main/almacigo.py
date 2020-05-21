@@ -1,7 +1,7 @@
 # almacigo.py
 
 
-from machine import Pin, I2C
+from machine import Pin, I2C, PWM
 from time import sleep
 from . import time_date
 from . import ota_updater
@@ -16,11 +16,13 @@ i2c = I2C(1, sda=Pin(21), scl=Pin(22))                # i2c Pin
 lcd = ulcd1602.LCD1602(i2c)                           # LCD1602 OBJ
 ds_pin = machine.Pin(4)                               # DS18b20 Pin
 ds_sensor = ds18x20.DS18X20(onewire.OneWire(ds_pin))  # DS18B20 OBJ
+servo = PWM(Pin(2), freq = 50, duty = 45)             #valve
 
 
 class Nursery:
     def __init__(self, cv):
         print('start...')
+        closeV = rutina.openValve()
         self.cv = cv            # ver1602
         lcd.puts("v", 12, 1)
         lcd.puts(self.cv, 13, 1)
@@ -38,6 +40,7 @@ def process():
             dt = date.readTimeDate()
             newFirmware()   # CHECK/DOWNLOAD/INSTALL/REBOOT
         if dt[0] == 4 and dt[1] == 30:
+            lcd.puts("IN", 0, 1) 
             rt = rutina.Riego()
         print_date_time()               # LCD1602 date&time
         ds18b20()                    # read&LCD1602 ds18b20
