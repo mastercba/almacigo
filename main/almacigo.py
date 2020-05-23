@@ -12,17 +12,18 @@ import machine, onewire, ds18x20
 
 # ESP32 Pin Layout
 led = Pin(13, Pin.OUT, value=0)                       # BlueLed Pin
-i2c = I2C(1, sda=Pin(21), scl=Pin(22))                # i2c Pin
+i2c = I2C(-1, sda=Pin(21), scl=Pin(22), freq=400000)      # i2c Pin
 lcd = ulcd1602.LCD1602(i2c)                           # LCD1602 OBJ
 ds_pin = machine.Pin(4)                               # DS18b20 Pin
 ds_sensor = ds18x20.DS18X20(onewire.OneWire(ds_pin))  # DS18B20 OBJ
 servo = PWM(Pin(2), freq = 50, duty = 45)             #valve
+wqs_buffer = list()
 
 
 class Nursery:
     def __init__(self, cv):
         print('start...')
-        closeV = rutina.openValve()
+        closeV = rutina.closeValve()
         self.cv = cv            # ver1602
         lcd.puts("v", 12, 1)
         lcd.puts(self.cv, 13, 1)
@@ -39,12 +40,24 @@ def process():
             date = time_date.MyTimeDate()
             dt = date.readTimeDate()
             newFirmware()   # CHECK/DOWNLOAD/INSTALL/REBOOT
-        if dt[0] == 4 and dt[1] == 30:
-            lcd.puts("IN", 0, 1) 
+            lcd.puts("          ", 0, 1)
+        if dt[0] == 4 and dt[1] == 30:   # time to routine
+            lcd.puts("Working..", 0, 1) 
             rt = rutina.Riego()
+            lcd.puts("Done!     ", 0, 1)
+            date = time_date.MyTimeDate()
+            dt = date.readTimeDate()
+            lcd.puts(dt[0], 12, 0)      #hour
+            lcd.puts(":", 13, 0)        #:
+            if dt[1] < 10:              #minute
+                lcd.puts("0", 14, 0)
+                lcd.puts(dt[1], 15, 0)
+            else:
+                lcd.puts(dt[1], 14, 0)
+
         print_date_time()               # LCD1602 date&time
         ds18b20()                    # read&LCD1602 ds18b20
-
+#         waterQuality()              # set K0.1 waterquality
 # ----------------------------------------------------------
 
 # BlinkBlueLed
@@ -96,3 +109,21 @@ def ds18b20():
     #time.sleep(5)
       lcd.puts(temp, 6, 0)   # ds18b20->lcd1602
       lcd.puts("C", 10, 0)
+
+# Water Quality Sensor
+def waterQuality():
+    i2c.writeto(100, b'K,0.1')
+    sleep(5.0)
+    code = 0
+    while  not(code == 1):
+        i2c.start()
+        i2c.writeto(100, b'r')
+        sleep(1.0)
+        code = ord(i2c.readfrom(100, 1))
+        print(code)
+    sleep(15.0)    
+    print('WQS data is ready!')
+    wqs_buffer = i2c.readfrom(100, 48)
+    i2c.stop()
+    print(wqs_buffer)  
+    
