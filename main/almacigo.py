@@ -11,19 +11,22 @@ import machine, onewire, ds18x20
 
 
 # ESP32 Pin Layout
-led = Pin(13, Pin.OUT, value=0)                       # BlueLed Pin
-i2c = I2C(-1, sda=Pin(21), scl=Pin(22), freq=400000)      # i2c Pin
-lcd = ulcd1602.LCD1602(i2c)                           # LCD1602 OBJ
-ds_pin = machine.Pin(4)                               # DS18b20 Pin
-ds_sensor = ds18x20.DS18X20(onewire.OneWire(ds_pin))  # DS18B20 OBJ
-servo = PWM(Pin(2), freq = 50, duty = 45)             #valve
-wqs_buffer = list()
+led = Pin(2, Pin.OUT, value=0)                          # BlueLed Pin
+i2c = I2C(-1, sda=Pin(18), scl=Pin(19), freq=400000)        # i2c Pin
+lcd = ulcd1602.LCD1602(i2c)                             # LCD1602 OBJ
+ds_pin = machine.Pin(13)                                # DS18b20 Pin
+ds_sensor = ds18x20.DS18X20(onewire.OneWire(ds_pin))    # DS18B20 OBJ
+# servo = PWM(Pin(12), freq = 50)                         #valve, close
+
 
 
 class Nursery:
     def __init__(self, cv):
         print('start...')
+        #servo.duty(80)
         closeV = rutina.closeValve()
+        lcd.puts("          ", 0, 1)
+        #servo.deinit()
         self.cv = cv            # ver1602
         lcd.puts("v", 12, 1)
         lcd.puts(self.cv, 13, 1)
@@ -39,9 +42,10 @@ def process():
         if dt[0] == 21 and dt[1] == 0:  # refresh Time&Date
             date = time_date.MyTimeDate()
             dt = date.readTimeDate()
-            newFirmware()   # CHECK/DOWNLOAD/INSTALL/REBOOT
+#             newFirmware()   # CHECK/DOWNLOAD/INSTALL/REBOOT
             lcd.puts("          ", 0, 1)
-        if dt[0] == 4 and dt[1] == 30:   # time to routine
+            lcd.puts("    ", 12, 0)
+        if dt[0] == 4 and dt[1] == 30:    # time to routine
             lcd.puts("Working..", 0, 1) 
             rt = rutina.Riego()
             lcd.puts("Done!     ", 0, 1)
@@ -54,9 +58,9 @@ def process():
                 lcd.puts(dt[1], 15, 0)
             else:
                 lcd.puts(dt[1], 14, 0)
-
         print_date_time()               # LCD1602 date&time
         ds18b20()                    # read&LCD1602 ds18b20
+#         servo = PWM(Pin(2), freq = 50, duty = 40)
 #         waterQuality()              # set K0.1 waterquality
 # ----------------------------------------------------------
 
@@ -111,19 +115,19 @@ def ds18b20():
       lcd.puts("C", 10, 0)
 
 # Water Quality Sensor
-def waterQuality():
-    i2c.writeto(100, b'K,0.1')
-    sleep(5.0)
-    code = 0
-    while  not(code == 1):
-        i2c.start()
-        i2c.writeto(100, b'r')
-        sleep(1.0)
-        code = ord(i2c.readfrom(100, 1))
-        print(code)
-    sleep(15.0)    
-    print('WQS data is ready!')
-    wqs_buffer = i2c.readfrom(100, 48)
-    i2c.stop()
-    print(wqs_buffer)  
+# def waterQuality():
+#     i2c.writeto(100, b'K,0.1')
+#     sleep(5.0)
+#     code = 0
+#     while  not(code == 1):
+#         i2c.start()
+#         i2c.writeto(100, b'r')
+#         sleep(1.0)
+#         code = ord(i2c.readfrom(100, 1))
+#         print(code)
+#     sleep(15.0)    
+#     print('WQS data is ready!')
+#     wqs_buffer = i2c.readfrom(100, 48)
+#     i2c.stop()
+#     print(wqs_buffer)  
     
