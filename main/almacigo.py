@@ -3,11 +3,14 @@
 
 from machine import Pin, I2C, PWM
 from time import sleep
+# from SIM800L import Modem
+from . import SIM800L
 from . import time_date
 from . import ota_updater
 from . import rutina
 from . import ulcd1602
-import machine, onewire, ds18x20
+import machine, onewire, ds18x20, json
+
 
 
 # ESP32 Pin Layout
@@ -17,7 +20,12 @@ lcd = ulcd1602.LCD1602(i2c)                             # LCD1602 OBJ
 ds_pin = machine.Pin(13)                                # DS18b20 Pin
 ds_sensor = ds18x20.DS18X20(onewire.OneWire(ds_pin))    # DS18B20 OBJ
 # servo = PWM(Pin(12), freq = 50)                         #valve, close
-
+# Create new modem object on the right Pins
+modem = SIM800L.Modem(MODEM_PWKEY_PIN    = 4,
+                      MODEM_RST_PIN      = 5,
+                      MODEM_POWER_ON_PIN = 23,
+                      MODEM_TX_PIN       = 16,
+                      MODEM_RX_PIN       = 17)
 
 
 class Nursery:
@@ -30,6 +38,23 @@ class Nursery:
         self.cv = cv            # ver1602
         lcd.puts("v", 12, 1)
         lcd.puts(self.cv, 13, 1)
+        
+        # Initialize the modem
+        modem.initialize()
+        # Run some optional diagnostics
+        print('Modem info: "{}"'.format(modem.get_info()))        
+        #print('Network scan: "{}"'.format(modem.scan_networks()))
+        #print('Current network: "{}"'.format(modem.get_current_network()))
+        #print('Signal strength: "{}%"'.format(modem.get_signal_strength()*100))
+        # Connect the modem
+        modem.connect(apn='internet.tigo.bo')
+        print('\nModem IP address: "{}"'.format(modem.get_ip_addr()))
+        #print('Get TimeDate: "{}"'.format(modem.get_NTP_time_date()))
+        rx_time_date = modem.get_time_date()
+        print('Date = ', rx_time_date[8:16])
+        rx_time = rx_time_date.split(',')[-1].split('-')[0]
+        print('System TIME: {}'.format(rx_time))
+
         process()               # main
 
 
