@@ -11,6 +11,12 @@ from . import rutina
 from . import ulcd1602
 import machine, onewire, ds18x20, json
 
+# Create new modem object on the right Pins
+modem = SIM800L.Modem(MODEM_PWKEY_PIN    = 4,
+                      MODEM_RST_PIN      = 5,
+                      MODEM_POWER_ON_PIN = 23,
+                      MODEM_TX_PIN       = 16,
+                      MODEM_RX_PIN       = 17)
 
 
 # ESP32 Pin Layout
@@ -20,12 +26,6 @@ lcd = ulcd1602.LCD1602(i2c)                             # LCD1602 OBJ
 ds_pin = machine.Pin(13)                                # DS18b20 Pin
 ds_sensor = ds18x20.DS18X20(onewire.OneWire(ds_pin))    # DS18B20 OBJ
 # servo = PWM(Pin(12), freq = 50)                         #valve, close
-# Create new modem object on the right Pins
-modem = SIM800L.Modem(MODEM_PWKEY_PIN    = 4,
-                      MODEM_RST_PIN      = 5,
-                      MODEM_POWER_ON_PIN = 23,
-                      MODEM_TX_PIN       = 16,
-                      MODEM_RX_PIN       = 17)
 
 
 class Nursery:
@@ -38,23 +38,24 @@ class Nursery:
         self.cv = cv            # ver1602
         lcd.puts("v", 12, 1)
         lcd.puts(self.cv, 13, 1)
-        
         # Initialize the modem
         modem.initialize()
-        # Run some optional diagnostics
-        print('Modem info: "{}"'.format(modem.get_info()))        
-        #print('Network scan: "{}"'.format(modem.scan_networks()))
-        #print('Current network: "{}"'.format(modem.get_current_network()))
-        #print('Signal strength: "{}%"'.format(modem.get_signal_strength()*100))
         # Connect the modem
         modem.connect(apn='internet.tigo.bo')
         print('\nModem IP address: "{}"'.format(modem.get_ip_addr()))
-        #print('Get TimeDate: "{}"'.format(modem.get_NTP_time_date()))
-        rx_time_date = modem.get_time_date()
+        # Are time&Date valid?
+        modem.get_NTP_time_date()
+        rx_time_date = modem.get_time_date()# read Time&Date
         print('Date = ', rx_time_date[8:16])
         rx_time = rx_time_date.split(',')[-1].split('-')[0]
-        print('System TIME: {}'.format(rx_time))
-
+        year = str(rx_time_date[8:10])         
+        while (year < '20'):
+            modem.get_NTP_time_date()
+            machine.reset()
+#       print('Get TimeDate: "{}"'.format(modem.get_NTP_time_date()))
+        # Disconnect Modem
+        #modem.disconnect()
+        
         process()               # main
 
 
@@ -62,30 +63,32 @@ class Nursery:
 def process():
     while True:
         blink_blue_led()                              # BBL
-        date = time_date.MyTimeDate()      # read Time&Date
-        dt = date.readTimeDate()
-        if dt[0] == 21 and dt[1] == 0:  # refresh Time&Date
-            date = time_date.MyTimeDate()
-            dt = date.readTimeDate()
-#             newFirmware()   # CHECK/DOWNLOAD/INSTALL/REBOOT
+        system_clk = modem.get_time_date() # read Time&Date
+        print('Date = ', system_clk[8:16])
+        sys_time = system_clk.split(',')[-1].split('-')[0]
+        print('System TIME: {}'.format(sys_time))
+        hr = str(sys_time.split(':')[0])
+        minu = str(sys_time.split(':')[1])
+                
+        if hr == '21' and minu == '00': # refresh Time&Date
+            #newFirmware()   # CHECK/DOWNLOAD/INSTALL/REBOOT
             lcd.puts("          ", 0, 1)
             lcd.puts("    ", 12, 0)
-        if dt[0] == 4 and dt[1] == 30:    # time to routine
+            
+        if hr == '04' and minu == '30':   # time to routine
             lcd.puts("Working..", 0, 1) 
             rt = rutina.Riego()
             lcd.puts("Done!     ", 0, 1)
-            date = time_date.MyTimeDate()
-            dt = date.readTimeDate()
-            lcd.puts(dt[0], 12, 0)      #hour
-            lcd.puts(":", 13, 0)        #:
-            if dt[1] < 10:              #minute
-                lcd.puts("0", 14, 0)
-                lcd.puts(dt[1], 15, 0)
-            else:
-                lcd.puts(dt[1], 14, 0)
+            system_clk = modem.get_time_date()
+            sys_time = system_clk.split(',')[-1].split('-')[0]
+            hr = str(sys_time.split(':')[0])
+            minu = str(sys_time.split(':')[1])
+            lcd.puts(hr, 11, 0)      #hour
+            lcd.puts(":", 13, 0)     #:
+            lcd.puts(minu, 14, 0)    #minute
+
         print_date_time()               # LCD1602 date&time
         ds18b20()                    # read&LCD1602 ds18b20
-#         servo = PWM(Pin(2), freq = 50, duty = 40)
 #         waterQuality()              # set K0.1 waterquality
 # ----------------------------------------------------------
 
@@ -105,22 +108,15 @@ def newFirmware():
 
 # LCD1602 date&time
 def print_date_time():
-    date = time_date.MyTimeDate()      # read Time&Date
-    dt = date.readTimeDate()
-    if dt[1] < 10:
-        lcd.puts(dt[0], 0, 0)
-        lcd.puts(":", 2, 0)
-        lcd.puts("0", 3, 0)
-        lcd.puts(dt[1], 4, 0)
-    elif dt[0] < 10:
-        lcd.puts("0", 0, 0)
-        lcd.puts(dt[0], 1, 0)
-        lcd.puts(":", 2, 0)
-        lcd.puts(dt[1], 3, 0)
-    else:
-        lcd.puts(dt[0], 0, 0)
-        lcd.puts(":", 2, 0)
-        lcd.puts(dt[1], 3, 0)
+    system_clk = modem.get_time_date()  # read Time&Date
+    print('Date = ', system_clk[8:16])
+    sys_time = system_clk.split(',')[-1].split('-')[0]
+    print('System TIME: {}'.format(sys_time))
+    hr = str(sys_time.split(':')[0])
+    minu = str(sys_time.split(':')[1])
+    lcd.puts(":", 2, 0)
+    lcd.puts(hr, 0, 0)
+    lcd.puts(minu, 3, 0)
 
 # DS18B20
 def ds18b20():

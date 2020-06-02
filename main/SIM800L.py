@@ -104,7 +104,7 @@ class Modem(object):
         # Commands dictionary. Not the best approach ever, but works nicely.
         commands = {
                     'cntpcid':    {'string':'AT+CNTPCID=1', 'timeout':3, 'end': 'OK'},
-                    'cntpip':     {'string':'AT+CNTP= "88.147.254.227"', 'timeout':5, 'end': 'OK'},
+                    'cntpip':     {'string':'AT+CNTP= "88.147.254.227",-16', 'timeout':5, 'end': 'OK'},
                     'cntpask':    {'string':'AT+CNTP?', 'timeout':5, 'end': 'OK'},
                     'cntpalone':  {'string':'AT+CNTP', 'timeout':5, 'end': 'OK'},
                     'clts1':      {'string':'AT+CLTS=1', 'timeout':5, 'end': 'OK'},
@@ -274,15 +274,11 @@ class Modem(object):
 
 # Get NTP TimeDate
     def get_NTP_time_date(self):
-        #output = self.execute_at_command('opengprs')
-        #output1 = self.execute_at_command('getbear')
         self.execute_at_command('cntpcid')
         self.execute_at_command('cntpip')
-        #output4 = self.execute_at_command('cntpask')
         self.execute_at_command('cntpalone')
         self.execute_at_command('clts1')
-        #output7 = self.execute_at_command('ceng3')      
-        #return output2
+
 
 # time&date
     def get_time_date(self): 
