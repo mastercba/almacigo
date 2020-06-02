@@ -3,9 +3,7 @@
 
 from machine import Pin, I2C, PWM
 from time import sleep
-# from SIM800L import Modem
 from . import SIM800L
-from . import time_date
 from . import ota_updater
 from . import rutina
 from . import ulcd1602
