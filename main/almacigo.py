@@ -68,12 +68,11 @@ def process():
         hr = str(sys_time.split(':')[0])
         minu = str(sys_time.split(':')[1])
                 
-        if hr == '21' and minu == '00': # refresh Time&Date
+        if hr == "21" and minu == "00": # refresh Time&Date
             #newFirmware()   # CHECK/DOWNLOAD/INSTALL/REBOOT
             lcd.puts("          ", 0, 1)
             lcd.puts("    ", 12, 0)
-            
-        if hr == '04' and minu == '30':   # time to routine
+        if hr == "04" and minu == "30":   # time to routine
             lcd.puts("Working..", 0, 1) 
             rt = rutina.Riego()
             lcd.puts("Done!     ", 0, 1)
@@ -84,7 +83,15 @@ def process():
             lcd.puts(hr, 11, 0)      #hour
             lcd.puts(":", 13, 0)     #:
             lcd.puts(minu, 14, 0)    #minute
-
+        if hr == "12" and minu == "00":     # time to water
+            agua = rutina.rutinaAgua()
+            lcd.puts("          ", 0, 1)
+            lcd.puts("1", 11, 1)
+        if hr == "20" and minu == "00":     # time to water    
+            agua = rutina.rutinaAgua()
+            lcd.puts("          ", 0, 1)
+            lcd.puts("2", 11, 1)
+            
         print_date_time()               # LCD1602 date&time
         ds18b20()                    # read&LCD1602 ds18b20
 #         waterQuality()              # set K0.1 waterquality

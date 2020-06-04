@@ -38,6 +38,13 @@ def rutinaRiego():
     
 #     post()
 # ---------------------------------------------------------
+def rutinaAgua():
+    if not llenarTanque():
+        print('no se pudo llenar tanque de agua')
+        lcdR.puts("No Agua!..", 0, 1)
+    mezclarTanqueAB()
+    riego()
+# ---------------------------------------------------------
 
 def llenarTanque():
     print('llenamos tanque de agua')
@@ -84,7 +91,7 @@ def vaciarBandejas():
     #Close Valve
     openValve()
     #wait....
-    sleep(90)#90
+    sleep(180)#90
     #Open Valve
     closeValve()
     
@@ -111,5 +118,5 @@ def riego():
     print('riego')
     lcdR.puts("Riego.....", 0, 1)
     RG.off()                             # RG ON
-    sleep(60)#60
+    sleep(90)#60
     RG.on()                             # RG OFF    
