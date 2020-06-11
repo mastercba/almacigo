@@ -9,6 +9,11 @@ from . import rutina
 from . import ulcd1602
 import machine, onewire, ds18x20, json
 
+
+#display ,0 hh:mm 25.4C xxxx
+#display ,1 R:!**V:closev3.9
+
+
 # Create new modem object on the right Pins
 modem = SIM800L.Modem(MODEM_PWKEY_PIN    = 4,
                       MODEM_RST_PIN      = 5,
@@ -29,9 +34,9 @@ ds_sensor = ds18x20.DS18X20(onewire.OneWire(ds_pin))    # DS18B20 OBJ
 class Nursery:
     def __init__(self, cv):
         print('start...')
+        lcd.puts("R:   V:", 0, 1)         #riegos
         #servo.duty(80)
         closeV = rutina.closeValve()
-        lcd.puts("          ", 0, 1)
         #servo.deinit()
         self.cv = cv            # ver1602
         lcd.puts("v", 12, 1)
@@ -46,15 +51,19 @@ class Nursery:
         rx_time_date = modem.get_time_date()# read Time&Date
         print('Date = ', rx_time_date[8:16])
         rx_time = rx_time_date.split(',')[-1].split('-')[0]
-        year = str(rx_time_date[8:10])         
-        while (year < '20'):
-            modem.get_NTP_time_date()
+        year = str(rx_time_date[8:10])
+        if (year < "20"):
+            sleep(20)
+            #machine.soft_reset()
+            #sleep(45)
             machine.reset()
+        #soft reset : import sys sys.exit()
+        #hard reset : import machine machine.reset()    
 #       print('Get TimeDate: "{}"'.format(modem.get_NTP_time_date()))
         # Disconnect Modem
         #modem.disconnect()
         
-        process()               # main
+        process()                          # main
 
 
 # ----------------------------------------------------------
@@ -67,30 +76,18 @@ def process():
         print('System TIME: {}'.format(sys_time))
         hr = str(sys_time.split(':')[0])
         minu = str(sys_time.split(':')[1])
-                
-        if hr == "21" and minu == "00": # refresh Time&Date
+        #if hr == "21" and minu == "00": # refresh Time&Date
             #newFirmware()   # CHECK/DOWNLOAD/INSTALL/REBOOT
-            lcd.puts("          ", 0, 1)
-            lcd.puts("    ", 12, 0)
-        if hr == "04" and minu == "30":   # time to routine
-            lcd.puts("Working..", 0, 1) 
-            rt = rutina.Riego()
-            lcd.puts("Done!     ", 0, 1)
-            system_clk = modem.get_time_date()
-            sys_time = system_clk.split(',')[-1].split('-')[0]
-            hr = str(sys_time.split(':')[0])
-            minu = str(sys_time.split(':')[1])
-            lcd.puts(hr, 11, 0)      #hour
-            lcd.puts(":", 13, 0)     #:
-            lcd.puts(minu, 14, 0)    #minute
+                                           # time to routine
+        if (hr[0] == "0" and hr[1] == "4") and minu == "30":   
+            lcd.puts("w", 2, 1)
+            rt = rutina.rutinaRiego()
         if hr == "12" and minu == "00":     # time to water
-            agua = rutina.rutinaAgua()
-            lcd.puts("          ", 0, 1)
-            lcd.puts("1", 11, 1)
+            lcd.puts("w", 3, 1)
+            agua = rutina.rutinaAgua12()
         if hr == "20" and minu == "00":     # time to water    
-            agua = rutina.rutinaAgua()
-            lcd.puts("          ", 0, 1)
-            lcd.puts("2", 11, 1)
+            lcd.puts("w", 4, 1)
+            agua1 = rutina.rutinaAgua20() 
             
         print_date_time()               # LCD1602 date&time
         ds18b20()                    # read&LCD1602 ds18b20
@@ -119,9 +116,9 @@ def print_date_time():
     print('System TIME: {}'.format(sys_time))
     hr = str(sys_time.split(':')[0])
     minu = str(sys_time.split(':')[1])
-    lcd.puts(":", 2, 0)
-    lcd.puts(hr, 0, 0)
-    lcd.puts(minu, 3, 0)
+    lcd.puts(":", 2, 0)     #:
+    lcd.puts(hr, 0, 0)      #hora
+    lcd.puts(minu, 3, 0)    #minute
 
 # DS18B20
 def ds18b20():

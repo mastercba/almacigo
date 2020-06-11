@@ -1,7 +1,7 @@
 # MAIN - SEEDING
 # -----------------------------------------------------------------------------
 
-from main.ota_updater import OTAUpdater 
+from main.ota_updater import OTAUpdater
 
 
 def download_and_install_update_if_available():

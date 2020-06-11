@@ -27,28 +27,40 @@ class Riego:
 def rutinaRiego():
     if not llenarTanque():
         print('no se pudo llenar tanque de agua')
-        lcdR.puts("No Agua!..", 0, 1)
+        lcdR.puts("!", 2, 1)
+        return
     mezclarTanqueAB()
     dosificaAB()
     mezclarON()
     vaciarBandejas()
     mezclarOFF()
     riego()
-#     servo.deinit()
-    
-#     post()
+    lcdR.puts("*", 2, 1)
 # ---------------------------------------------------------
-def rutinaAgua():
+def rutinaAgua12():
     if not llenarTanque():
         print('no se pudo llenar tanque de agua')
-        lcdR.puts("No Agua!..", 0, 1)
+        lcdR.puts("!", 3, 1)
+        return
+    lcdR.puts("m", 3, 1)
     mezclarTanqueAB()
+    lcdR.puts("r", 3, 1)
     riego()
+    lcdR.puts("*", 3, 1)
 # ---------------------------------------------------------
-
+def rutinaAgua20():
+    if not llenarTanque():
+        print('no se pudo llenar tanque de agua')
+        lcdR.puts("!", 4, 1)
+        return
+    lcdR.puts("m", 4, 1)
+    mezclarTanqueAB()
+    lcdR.puts("r", 4, 1)
+    riego()
+    lcdR.puts("*", 4, 1)
+# ---------------------------------------------------------
 def llenarTanque():
     print('llenamos tanque de agua')
-    lcdR.puts("Tanque....", 0, 1)
     dog = 1
     num = 0
     WT.off()
@@ -75,16 +87,14 @@ def llenarTanque():
 
 def mezclarTanqueAB():
     print('mezclar tanques')
-    lcdR.puts("Mezclar...", 0, 1)
     MZ.off()                             # MZ ON
-    sleep(45)#45
+    sleep(120)#45
     MZ.on()                             # MZ OFF
 
 def dosificaAB():
     print('dosifica AB')
-    lcdR.puts("Dosf A&B..", 0, 1)
     NT.off()                             # NT ON
-    sleep(8)#8
+    sleep(40)#8
     NT.on()                             # NT OFF
 
 def vaciarBandejas():
@@ -97,14 +107,16 @@ def vaciarBandejas():
     
 def closeValve():
     print('cerramos valvula')
-    lcdR.puts("Cerrar....", 0, 1) 
+    lcdR.puts("     ", 7, 1)
     servo.duty(35)
     servo.duty(42)
+    lcdR.puts("close", 7, 1)
 
 def openValve():
     print('abrimos valvula')
-    lcdR.puts("Abrir.....", 0, 1)
-    servo.duty(80)  
+    lcdR.puts("     ", 7, 1)
+    servo.duty(80)
+    lcdR.puts("open", 7, 1)
 
 def mezclarON():
     print('mezcla ON')
@@ -116,7 +128,6 @@ def mezclarOFF():
     
 def riego():
     print('riego')
-    lcdR.puts("Riego.....", 0, 1)
     RG.off()                             # RG ON
-    sleep(90)#60
-    RG.on()                             # RG OFF    
+    sleep(270)#90=1minuto
+    RG.on()                             # RG OFF
