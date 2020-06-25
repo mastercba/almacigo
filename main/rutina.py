@@ -59,11 +59,19 @@ def rutinaAgua20():
     riego()
     lcdR.puts("*", 4, 1)
 # ---------------------------------------------------------
+def rutinaAguaSMS():
+    if not llenarTanque():
+        print('no se pudo llenar tanque de agua')
+        return
+    mezclarTanqueAB()
+    riego()
+# ---------------------------------------------------------
 def llenarTanque():
     print('llenamos tanque de agua')
     dog = 1
     num = 0
     WT.off()
+    sleep(2)
     MZ.off()
     while adc.value() == 1:            # 1:vacio
         print("{}vacio".format(adc.value()))
@@ -82,41 +90,45 @@ def llenarTanque():
             WT.off()
             MZ.off()
     WT.on()
+    sleep(2)
     MZ.on()
+    sleep(2)
     return True                    #tanque lleno
 
 def mezclarTanqueAB():
     print('mezclar tanques')
+    lcd.puts("MZ", 10, 1)
     MZ.off()                             # MZ ON
-    sleep(120)#45
+    sleep(120)# en segundos
     MZ.on()                             # MZ OFF
+    lcd.puts("  ", 10, 1)
 
 def dosificaAB():
     print('dosifica AB')
     NT.off()                             # NT ON
-    sleep(40)#8
+    sleep(17)# en segundos
     NT.on()                             # NT OFF
 
 def vaciarBandejas():
     #Close Valve
     openValve()
     #wait....
-    sleep(180)#90
+    sleep(240)# en segundos
     #Open Valve
     closeValve()
     
 def closeValve():
     print('cerramos valvula')
-    lcdR.puts("     ", 7, 1)
+    lcdR.puts(" ", 7, 1)
     servo.duty(35)
     servo.duty(42)
-    lcdR.puts("close", 7, 1)
+    lcdR.puts("c", 7, 1)
 
 def openValve():
     print('abrimos valvula')
-    lcdR.puts("     ", 7, 1)
+    lcdR.puts(" ", 7, 1)
     servo.duty(80)
-    lcdR.puts("open", 7, 1)
+    lcdR.puts("o", 7, 1)
 
 def mezclarON():
     print('mezcla ON')

@@ -12,6 +12,8 @@ import machine, onewire, ds18x20, json
 
 #display ,0 hh:mm 25.4C xxxx
 #display ,1 R:!**V:closev3.9
+#display ,1 R:!**V:c #ST 3.9
+#display ,1 R:!  V:c  MZ 3.9
 
 
 # Create new modem object on the right Pins
@@ -31,6 +33,92 @@ ds_sensor = ds18x20.DS18X20(onewire.OneWire(ds_pin))    # DS18B20 OBJ
 # servo = PWM(Pin(12), freq = 50)                         #valve, close
 
 
+# rutinas SMS
+def smsreporte():
+    #21:10/21.6*C/21 Riegos/Agua0OK..!/TDS:1200/SD23Bs
+    print('ST')
+    lcd.puts("#ST", 9, 1)
+    #data2send = []
+    #data2send.append(hr[0])
+    #data2send.append(':')
+    #data2send[2] = hr[1]
+    #data2send.append('/')
+    #modem.send_sms()
+    lcd.puts("   ", 9, 1)
+
+def smsriego():
+    #15:19/1-2Riegos
+    print('RG')
+    lcd.puts("#RG", 9, 1)
+    smsriego = rutina.rutinaAguaSMS()
+    lcd.puts("   ", 9, 1)
+
+def smsnutre():
+    #15:19/OK!
+    print('NT')
+    lcd.puts("#NT", 9, 1)
+    smsriego = rutina.dosificaAB()
+    lcd.puts("   ", 9, 1)
+
+def smsmezcla():
+    #15:19/OK!
+    print('MZ')
+    lcd.puts("#MZ", 9, 1)
+    smsriego = rutina.mezclarTanqueAB()
+    lcd.puts("   ", 9, 1)
+
+def smssensores():
+    #EC:1677-TDS:905-SAL:0.84-SG:1.000
+    print('SR')
+
+def smsbandejas():
+    #15:19/OK!
+    print('BJ')
+    lcd.puts("#BJ", 9, 1)
+    smsriego = rutina.vaciarBandejas()
+    lcd.puts("   ", 9, 1)
+    
+def smswater():
+    #15:19/OK!
+    print('WT')
+    lcd.puts("#WT", 9, 1)
+    smsriego = rutina.llenarTanque()
+    if not smsriego:
+        print('no se pudo llenar tanque de agua')
+        lcd.puts("fail", 9, 1)
+        sleep(50)
+    lcd.puts("    ", 9, 1)
+    
+
+codes ={
+    'ST' : smsreporte,
+    'RG' : smsriego,
+    'NT' : smsnutre,
+    'MZ' : smsmezcla,
+    'SR' : smssensores,
+    'WT' : smswater,
+    'BJ' : smsbandejas
+    }
+
+
+## Simple software WDT implementation
+wdt_counter = 0
+
+def wdt_callback():
+    global wdt_counter
+    wdt_counter += 1
+    if (wdt_counter >= 750):#90==1min
+        machine.reset()
+
+def wdt_feed():
+    global wdt_counter
+    wdt_counter = 0
+
+wdt_timer = machine.Timer(-1)
+wdt_timer.init(period=1000, mode=machine.Timer.PERIODIC, callback=lambda t:wdt_callback())
+## END Simple software WDT implementation
+
+
 class Nursery:
     def __init__(self, cv):
         print('start...')
@@ -39,7 +127,7 @@ class Nursery:
         closeV = rutina.closeValve()
         #servo.deinit()
         self.cv = cv            # ver1602
-        lcd.puts("v", 12, 1)
+        #lcd.puts("v", 12, 1)
         lcd.puts(self.cv, 13, 1)
         # Initialize the modem
         modem.initialize()
@@ -58,8 +146,12 @@ class Nursery:
             #sleep(45)
             machine.reset()
         #soft reset : import sys sys.exit()
-        #hard reset : import machine machine.reset()    
-#       print('Get TimeDate: "{}"'.format(modem.get_NTP_time_date()))
+        #hard reset : import machine machine.reset()
+        #       print('Get TimeDate: "{}"'.format(modem.get_NTP_time_date()))    
+        modem.set_cnmi()         # Enable CMTI notification
+        modem.del_smss()               # Delete all SMS msg
+        modem.set_text_mode()           # SEt SMS text mode            
+
         # Disconnect Modem
         #modem.disconnect()
         
@@ -69,6 +161,7 @@ class Nursery:
 # ----------------------------------------------------------
 def process():
     while True:
+        wdt_feed()                              # reset WDT
         blink_blue_led()                              # BBL
         system_clk = modem.get_time_date() # read Time&Date
         print('Date = ', system_clk[8:16])
@@ -76,8 +169,11 @@ def process():
         print('System TIME: {}'.format(sys_time))
         hr = str(sys_time.split(':')[0])
         minu = str(sys_time.split(':')[1])
+        
         #if hr == "21" and minu == "00": # refresh Time&Date
-            #newFirmware()   # CHECK/DOWNLOAD/INSTALL/REBOOT
+            #POST data to webServer
+            #newFirmware()  # CHECK/DOWNLOAD/INSTALL/REBOOT
+        
                                            # time to routine
         if (hr[0] == "0" and hr[1] == "4") and minu == "30":   
             lcd.puts("w", 2, 1)
@@ -88,7 +184,16 @@ def process():
         if hr == "20" and minu == "00":     # time to water    
             lcd.puts("w", 4, 1)
             agua1 = rutina.rutinaAgua20() 
-            
+
+        sms_rqst = modem.check_sms_rcv()       # data rcved
+        vals = list(sms_rqst.values())
+        if vals[1] != '0':
+            work = codes[vals[0]]
+            work()
+                                                   # mezcla
+        if int(hr) in range(10,23,3) and (minu == "00"):
+            mz = rutina.mezclarTanqueAB()
+
         print_date_time()               # LCD1602 date&time
         ds18b20()                    # read&LCD1602 ds18b20
 #         waterQuality()              # set K0.1 waterquality
