@@ -34,6 +34,13 @@ ds_sensor = ds18x20.DS18X20(onewire.OneWire(ds_pin))    # DS18B20 OBJ
 
 
 # rutinas SMS
+def smsrutina():
+    #15:19/OK!
+    print('RT')
+    lcd.puts("#RT", 9, 1)
+    smsRutina = rutina.rutinaCamas()
+    lcd.puts("   ", 9, 1)
+    
 def smsreporte():
     #21:10/21.6*C/21 Riegos/Agua0OK..!/TDS:1200/SD23Bs
     print('ST')
@@ -91,6 +98,7 @@ def smswater():
     
 
 codes ={
+    'RT' : smsrutina,
     'ST' : smsreporte,
     'RG' : smsriego,
     'NT' : smsnutre,
@@ -175,9 +183,11 @@ def process():
             #newFirmware()  # CHECK/DOWNLOAD/INSTALL/REBOOT
         
                                            # time to routine
-        if (hr[0] == "0" and hr[1] == "4") and minu == "30":   
+        if (hr[0] == "0" and hr[1] == "4") and minu == "30":
             lcd.puts("w", 2, 1)
             rt = rutina.rutinaRiego()
+            print(rt)
+            #print('temperaruta: ', rt[TP]['18b20'])
         if hr == "12" and minu == "00":     # time to water
             lcd.puts("w", 3, 1)
             agua = rutina.rutinaAgua12()
