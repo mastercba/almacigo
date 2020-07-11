@@ -3,9 +3,9 @@
 
 from machine import Pin, I2C, PWM
 from time import sleep
-from . import SIM800L
+from . import sim800
 from . import ota_updater
-from . import rutina
+from . import servicio
 from . import ulcd1602
 import machine, onewire, ds18x20, json
 
@@ -17,11 +17,11 @@ import machine, onewire, ds18x20, json
 
 
 # Create new modem object on the right Pins
-modem = SIM800L.Modem(MODEM_PWKEY_PIN    = 4,
-                      MODEM_RST_PIN      = 5,
-                      MODEM_POWER_ON_PIN = 23,
-                      MODEM_TX_PIN       = 16,
-                      MODEM_RX_PIN       = 17)
+modem = sim800.Modem(MODEM_PWKEY_PIN    = 4,
+                     MODEM_RST_PIN      = 5,
+                     MODEM_POWER_ON_PIN = 23,
+                     MODEM_TX_PIN       = 16,
+                     MODEM_RX_PIN       = 17)
 
 
 # ESP32 Pin Layout
@@ -31,14 +31,14 @@ lcd = ulcd1602.LCD1602(i2c)                             # LCD1602 OBJ
 ds_pin = machine.Pin(13)                                # DS18b20 Pin
 ds_sensor = ds18x20.DS18X20(onewire.OneWire(ds_pin))    # DS18B20 OBJ
 # servo = PWM(Pin(12), freq = 50)                         #valve, close
-
+servo = PWM(Pin(12), freq = 50)
 
 # rutinas SMS
 def smsrutina():
     #15:19/OK!
     print('RT')
     lcd.puts("#RT", 9, 1)
-    smsRutina = rutina.rutinaCamas()
+    smsRutina = servicio.rutinaCamas()
     lcd.puts("   ", 9, 1)
     
 def smsreporte():
@@ -57,21 +57,21 @@ def smsriego():
     #15:19/1-2Riegos
     print('RG')
     lcd.puts("#RG", 9, 1)
-    smsriego = rutina.rutinaAguaSMS()
+    smsriego = servicio.rutinaAguaSMS()
     lcd.puts("   ", 9, 1)
 
 def smsnutre():
     #15:19/OK!
     print('NT')
     lcd.puts("#NT", 9, 1)
-    smsriego = rutina.dosificaAB()
+    smsriego = servicio.dosificaAB()
     lcd.puts("   ", 9, 1)
 
 def smsmezcla():
     #15:19/OK!
     print('MZ')
     lcd.puts("#MZ", 9, 1)
-    smsriego = rutina.mezclarTanqueAB()
+    smsriego = servicio.mezclarTanqueAB()
     lcd.puts("   ", 9, 1)
 
 def smssensores():
@@ -82,14 +82,14 @@ def smsbandejas():
     #15:19/OK!
     print('BJ')
     lcd.puts("#BJ", 9, 1)
-    smsriego = rutina.vaciarBandejas()
+    smsriego = servicio.vaciarBandejas()
     lcd.puts("   ", 9, 1)
     
 def smswater():
     #15:19/OK!
     print('WT')
     lcd.puts("#WT", 9, 1)
-    smsriego = rutina.llenarTanque()
+    smsriego = servicio.llenarTanque()
     if not smsriego:
         print('no se pudo llenar tanque de agua')
         lcd.puts("fail", 9, 1)
@@ -132,7 +132,7 @@ class Nursery:
         print('start...')
         lcd.puts("R:   V:", 0, 1)         #riegos
         #servo.duty(80)
-        closeV = rutina.closeValve()
+        closeV = servicio.closeValve()
         #servo.deinit()
         self.cv = cv            # ver1602
         #lcd.puts("v", 12, 1)
@@ -185,15 +185,15 @@ def process():
                                            # time to routine
         if (hr[0] == "0" and hr[1] == "4") and minu == "30":
             lcd.puts("w", 2, 1)
-            rt = rutina.rutinaRiego()
+            rt = servicio.rutinaRiego()
             print(rt)
             #print('temperaruta: ', rt[TP]['18b20'])
-        if hr == "12" and minu == "00":     # time to water
-            lcd.puts("w", 3, 1)
-            agua = rutina.rutinaAgua12()
-        if hr == "20" and minu == "00":     # time to water    
-            lcd.puts("w", 4, 1)
-            agua1 = rutina.rutinaAgua20() 
+#        if hr == "12" and minu == "00":     # time to water
+#            lcd.puts("w", 3, 1)
+#            agua = servicio.rutinaAgua12()
+#        if hr == "20" and minu == "00":     # time to water    
+#            lcd.puts("w", 4, 1)
+#            agua1 = servicio.rutinaAgua20() 
 
         sms_rqst = modem.check_sms_rcv()       # data rcved
         vals = list(sms_rqst.values())
@@ -202,7 +202,7 @@ def process():
             work()
                                                    # mezcla
         if int(hr) in range(10,23,3) and (minu == "00"):
-            mz = rutina.mezclarTanqueAB()
+            mz = servicio.mezclarTanqueAB()
 
         print_date_time()               # LCD1602 date&time
         ds18b20()                    # read&LCD1602 ds18b20
