@@ -17,10 +17,10 @@ def start():
 #     ota_updater.check_for_update_to_install_during_next_reboot()
 
     # Read version
-#     cv = ota_updater.read_current_version()
-    cv = '3.9'
+#     tag = ota_updater.read_current_version()
+    tag = '4.7'
     # Begin MAINcode
-    seed = Nursery(cv)
+    seed = Nursery(tag)
 
 def boot():
 #     download_and_install_update_if_available()

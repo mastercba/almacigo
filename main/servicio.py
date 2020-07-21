@@ -21,134 +21,84 @@ servo = PWM(Pin(12), freq = 50)                      #valve
 class Riego:
     def __init__(self):
         print('start Riego....')
-        rutinaRiego()
+        #rutinaRiego()
 
 # ---------------------------------------------------------
-def rutinaCamas():
-    resultado = dict()
-    resultado = {'WT':{'status': 'FAIL!'  ,'horas':'00', 'minutos':'00'},
-                 'MZ':{'status': 'OK!'  ,'horas':'00', 'minutos':'00'},
-                 'NT':{'status': 'FAIL!'  ,'horas':'00', 'minutos':'00'},
-                 'BJ':{'status': 'FAIL!'  ,'horas':'00', 'minutos':'00'},
-                 'RG':{'status': 'OK!'  ,'horas':'00', 'minutos':'00'},
-                 'SR':{'EC': '1677' ,'TDS': '905' ,'SAL': '0.84' ,'SG': '1.000'},
-                 'TP':{'18b20':'24.6'}
-                 }
-    
+def nutreCamas():
     lcdR.puts("w", 2, 1)
     if not llenarTanque():
         print('no se pudo llenar tanque de agua')
-        resultado['WT']['status'] = 'FAIL!'
-        resultado['WT']['horas'] = '20'
-        resultado['WT']['minutos'] = '30'
         lcdR.puts("!", 2, 1)
         return
-    resultado['WT']['status'] = 'OK!'
-    resultado['WT']['horas'] = '20'
-    resultado['WT']['minutos'] = '30'
-    
     lcdR.puts("m", 2, 1)
-    mezclarTanqueAB()
-    #mezclarTanqueAB()
-    resultado['MZ']['status'] = 'OK!'
-    resultado['MZ']['horas'] = '21'
-    resultado['MZ']['minutos'] = '31'
-    
+    mezclarTanques()
     lcdR.puts("n", 2, 1)
     dosificaAB()
     dosificaAB()
-    resultado['NT']['status'] = 'OK!'
-    resultado['NT']['horas'] = '22'
-    resultado['NT']['minutos'] = '32'
-    
     lcdR.puts("r", 2, 1)
     riego()
-    resultado['RG']['status'] = 'OK!'
-    resultado['RG']['horas'] = '24'
-    resultado['RG']['minutos'] = '34'
-    
     lcdR.puts("*", 2, 1)
-    return resultado
+
 # ---------------------------------------------------------
 def rutinaRiego():
-    #resultado = dict()
-    resultado = {'WT':{'status': 'FAIL!'  ,'horas':'00', 'minutos':'00'},
-                 'MZ':{'status': 'OK!'  ,'horas':'00', 'minutos':'00'},
-                 'NT':{'status': 'FAIL!'  ,'horas':'00', 'minutos':'00'},
-                 'BJ':{'status': 'FAIL!'  ,'horas':'00', 'minutos':'00'},
-                 'RG':{'status': 'OK!'  ,'horas':'00', 'minutos':'00'},
-                 'SR':{'EC': '1677' ,'TDS': '905' ,'SAL': '0.84' ,'SG': '1.000'},
-                 'TP':{'18b20':'24.6'}
-                 }
+#    #resultado = dict()
+#    resultado = {'WT':{'status': 'FAIL!'  ,'horas':'00', 'minutos':'00'},
+#                 'MZ':{'status': 'OK!'  ,'horas':'00', 'minutos':'00'},
+#                 'NT':{'status': 'FAIL!'  ,'horas':'00', 'minutos':'00'},
+#                 'BJ':{'status': 'FAIL!'  ,'horas':'00', 'minutos':'00'},
+#                 'RG':{'status': 'OK!'  ,'horas':'00', 'minutos':'00'},
+#                 'SR':{'EC': '1677' ,'TDS': '905' ,'SAL': '0.84' ,'SG': '1.000'},
+#                 'TP':{'18b20':'24.6'}
+#                 }
     
     if not llenarTanque():
         print('no se pudo llenar tanque de agua')
-        resultado['WT']['status'] = 'FAIL!'
-        resultado['WT']['horas'] = '20'
-        resultado['WT']['minutos'] = '30'
+#        resultado['WT']['status'] = 'FAIL!'
+#        resultado['WT']['horas'] = '20'
+#        resultado['WT']['minutos'] = '30'
         lcdR.puts("!", 2, 1)
         return
-    resultado['WT']['status'] = 'OK!'
-    resultado['WT']['horas'] = '20'
-    resultado['WT']['minutos'] = '30'
+#    resultado['WT']['status'] = 'OK!'
+#    resultado['WT']['horas'] = '20'
+#    resultado['WT']['minutos'] = '30'
     
     lcdR.puts("m", 2, 1)
-    mezclarTanqueAB()
-    resultado['MZ']['status'] = 'OK!'
-    resultado['MZ']['horas'] = '21'
-    resultado['MZ']['minutos'] = '31'
+    mezclarTanques()
+#    resultado['MZ']['status'] = 'OK!'
+#    resultado['MZ']['horas'] = '21'
+#    resultado['MZ']['minutos'] = '31'
     
     lcdR.puts("n", 2, 1)
     dosificaAB()
-    resultado['NT']['status'] = 'OK!'
-    resultado['NT']['horas'] = '22'
-    resultado['NT']['minutos'] = '32'
+#    resultado['NT']['status'] = 'OK!'
+#    resultado['NT']['horas'] = '22'
+#    resultado['NT']['minutos'] = '32'
     
     mezclarON()
     lcdR.puts("b", 2, 1)
     vaciarBandejas()
-    resultado['BJ']['status'] = 'OK!'
-    resultado['BJ']['horas'] = '23'
-    resultado['BJ']['minutos'] = '33'    
+#    resultado['BJ']['status'] = 'OK!'
+#    resultado['BJ']['horas'] = '23'
+#    resultado['BJ']['minutos'] = '33'
     mezclarOFF()
     
     lcdR.puts("r", 2, 1)
     riego()
-    resultado['RG']['status'] = 'OK!'
-    resultado['RG']['horas'] = '24'
-    resultado['RG']['minutos'] = '34'
+#    resultado['RG']['status'] = 'OK!'
+#    resultado['RG']['horas'] = '24'
+#    resultado['RG']['minutos'] = '34'
     
     lcdR.puts("*", 2, 1)
-    return resultado
+#    return resultado
 # ---------------------------------------------------------
-def rutinaAgua12():
-    if not llenarTanque():
-        print('no se pudo llenar tanque de agua')
-        lcdR.puts("!", 3, 1)
-        return
-    lcdR.puts("m", 3, 1)
-    mezclarTanqueAB()
-    lcdR.puts("r", 3, 1)
-    riego()
-    lcdR.puts("*", 3, 1)
-# ---------------------------------------------------------
-def rutinaAgua20():
-    if not llenarTanque():
-        print('no se pudo llenar tanque de agua')
-        lcdR.puts("!", 4, 1)
-        return
-    lcdR.puts("m", 4, 1)
-    mezclarTanqueAB()
-    lcdR.puts("r", 4, 1)
-    riego()
-    lcdR.puts("*", 4, 1)
-# ---------------------------------------------------------
-def rutinaAguaSMS():
+def regarSMS():
     if not llenarTanque():
         print('no se pudo llenar tanque de agua')
         return
-    mezclarTanqueAB()
+    mezclarTanques()
+    lcdR.puts("#RG", 9, 1)
     riego()
+    lcdR.puts("   ", 9, 1)
 # ---------------------------------------------------------
 def llenarTanque():
     print('llenamos tanque de agua')
@@ -179,25 +129,33 @@ def llenarTanque():
     sleep(2)
     return True                    #tanque lleno
 
-def mezclarTanqueAB():
+def mezclarTanques():
     print('mezclar tanques')
     lcdR.puts("MZ", 10, 1)
     MZ.off()                             # MZ ON
-    sleep(240)# en segundos
+    sleep(300)# en segundos
+    MZ.on()                             # MZ OFF
+    lcdR.puts("  ", 10, 1)
+
+def mezcla15min():
+    print('mezclar tanques')
+    lcdR.puts("MZ", 10, 1)
+    MZ.off()                             # MZ ON
+    sleep(900)# en segundos
     MZ.on()                             # MZ OFF
     lcdR.puts("  ", 10, 1)
 
 def dosificaAB():
     print('dosifica AB')
     NT.off()                             # NT ON
-    sleep(17)# en segundos
+    sleep(15)# en segundos
     NT.on()                             # NT OFF
 
 def vaciarBandejas():
     #Close Valve
     openValve()
     #wait....
-    sleep(300)# en segundos
+    sleep(600)# en segundos
     #Open Valve
     closeValve()
     
@@ -215,7 +173,10 @@ def openValve():
     print('abrimos valvula')
     lcdR.puts(" ", 7, 1)
     servo = PWM(Pin(12), freq = 50, duty = 45)
-    sleep(10)# en segundos    
+    sleep(10)# en segundos
+    servo.deinit()
+    sleep(10)# en segundos
+    servo = PWM(Pin(12), freq = 50)
     lcdR.puts("o", 7, 1)
 
 def mezclarON():
@@ -229,5 +190,5 @@ def mezclarOFF():
 def riego():
     print('riego')
     RG.off()                             # RG ON
-    sleep(300)#60=1minuto
+    sleep(240)#60=1minuto
     RG.on()                             # RG OFF

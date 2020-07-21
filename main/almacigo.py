@@ -7,6 +7,7 @@ from . import sim800
 from . import ota_updater
 from . import servicio
 from . import ulcd1602
+from . import water_quality
 import machine, onewire, ds18x20, json
 
 
@@ -34,55 +35,58 @@ ds_sensor = ds18x20.DS18X20(onewire.OneWire(ds_pin))    # DS18B20 OBJ
 servo = PWM(Pin(12), freq = 50)
 
 # rutinas SMS
-def smsrutina():
+def smsnuevonutriente():
     #15:19/OK!
-    print('RT')
-    lcd.puts("#RT", 9, 1)
-    smsRutina = servicio.rutinaCamas()
+    print('NN')
+    lcd.puts("#NN", 9, 1)
+    servicio.mezcla15min()
+    lcd.puts("   ", 9, 1)
+
+def smsnutrecama():
+    #15:19/OK!
+    print('NC')
+    lcd.puts("#NC", 9, 1)
+    servicio.nutreCamas()
     lcd.puts("   ", 9, 1)
     
 def smsreporte():
     #21:10/21.6*C/21 Riegos/Agua0OK..!/TDS:1200/SD23Bs
     print('ST')
     lcd.puts("#ST", 9, 1)
-    #data2send = []
-    #data2send.append(hr[0])
-    #data2send.append(':')
-    #data2send[2] = hr[1]
-    #data2send.append('/')
-    #modem.send_sms()
     lcd.puts("   ", 9, 1)
 
 def smsriego():
     #15:19/1-2Riegos
     print('RG')
     lcd.puts("#RG", 9, 1)
-    smsriego = servicio.rutinaAguaSMS()
+    servicio.regarSMS()
     lcd.puts("   ", 9, 1)
 
 def smsnutre():
     #15:19/OK!
     print('NT')
     lcd.puts("#NT", 9, 1)
-    smsriego = servicio.dosificaAB()
+    servicio.dosificaAB()
     lcd.puts("   ", 9, 1)
 
 def smsmezcla():
     #15:19/OK!
     print('MZ')
     lcd.puts("#MZ", 9, 1)
-    smsriego = servicio.mezclarTanqueAB()
+    servicio.mezclarTanques()
     lcd.puts("   ", 9, 1)
 
 def smssensores():
     #EC:1677-TDS:905-SAL:0.84-SG:1.000
     print('SR')
+    lcd.puts("#SR", 9, 1)
+    lcd.puts("   ", 9, 1)
 
 def smsbandejas():
     #15:19/OK!
     print('BJ')
     lcd.puts("#BJ", 9, 1)
-    smsriego = servicio.vaciarBandejas()
+    servicio.vaciarBandejas()
     lcd.puts("   ", 9, 1)
     
 def smswater():
@@ -98,7 +102,8 @@ def smswater():
     
 
 codes ={
-    'RT' : smsrutina,
+    'NN' : smsnuevonutriente,
+    'NC' : smsnutrecama,
     'ST' : smsreporte,
     'RG' : smsriego,
     'NT' : smsnutre,
@@ -128,15 +133,16 @@ wdt_timer.init(period=1000, mode=machine.Timer.PERIODIC, callback=lambda t:wdt_c
 
 
 class Nursery:
-    def __init__(self, cv):
+    def __init__(self, tag):
         print('start...')
-        lcd.puts("R:   V:", 0, 1)         #riegos
+        lcd.puts(":       C", 2, 0)       #setup lcd file 0
+        lcd.puts("R:   V:", 0, 1)         #setup lcd file 1
         #servo.duty(80)
         closeV = servicio.closeValve()
-        #servo.deinit()
-        self.cv = cv            # ver1602
-        #lcd.puts("v", 12, 1)
-        lcd.puts(self.cv, 13, 1)
+        self.tag = tag                                # TAG
+        lcd.puts(self.tag, 13, 1)
+        water_quality.set_K_wqs()      # Init Water Quality
+        water_quality.set_params_wqs()
         # Initialize the modem
         modem.initialize()
         # Connect the modem
@@ -163,7 +169,7 @@ class Nursery:
         # Disconnect Modem
         #modem.disconnect()
         
-        process()                          # main
+        process()                                    # main
 
 
 # ----------------------------------------------------------
@@ -185,15 +191,7 @@ def process():
                                            # time to routine
         if (hr[0] == "0" and hr[1] == "4") and minu == "30":
             lcd.puts("w", 2, 1)
-            rt = servicio.rutinaRiego()
-            print(rt)
-            #print('temperaruta: ', rt[TP]['18b20'])
-#        if hr == "12" and minu == "00":     # time to water
-#            lcd.puts("w", 3, 1)
-#            agua = servicio.rutinaAgua12()
-#        if hr == "20" and minu == "00":     # time to water    
-#            lcd.puts("w", 4, 1)
-#            agua1 = servicio.rutinaAgua20() 
+            servicio.rutinaRiego()
 
         sms_rqst = modem.check_sms_rcv()       # data rcved
         vals = list(sms_rqst.values())
@@ -206,7 +204,7 @@ def process():
 
         print_date_time()               # LCD1602 date&time
         ds18b20()                    # read&LCD1602 ds18b20
-#         waterQuality()              # set K0.1 waterquality
+        water_quality.read_wqs()             # waterquality
 # ----------------------------------------------------------
 
 # BlinkBlueLed
@@ -252,20 +250,3 @@ def ds18b20():
       lcd.puts(temp, 6, 0)   # ds18b20->lcd1602
       lcd.puts("C", 10, 0)
 
-# Water Quality Sensor
-# def waterQuality():
-#     i2c.writeto(100, b'K,0.1')
-#     sleep(5.0)
-#     code = 0
-#     while  not(code == 1):
-#         i2c.start()
-#         i2c.writeto(100, b'r')
-#         sleep(1.0)
-#         code = ord(i2c.readfrom(100, 1))
-#         print(code)
-#     sleep(15.0)    
-#     print('WQS data is ready!')
-#     wqs_buffer = i2c.readfrom(100, 48)
-#     i2c.stop()
-#     print(wqs_buffer)  
-    
