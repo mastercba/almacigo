@@ -12,8 +12,8 @@ lcdWQ = ulcd1602.LCD1602(i2cWQ)                   # LCD1602 OBJ
 # ---------------------------------------------------------
 def set_K_wqs():
     lcdWQ.puts("     ", 11, 0)
-    lcdWQ.puts("corto", 11, 0)
-    output = i2cWQ.writeto(100, b'K,1.0')     #K1.0(corto)
+    lcdWQ.puts("largo", 11, 0)
+    output = i2cWQ.writeto(100, b'K,0.1')     #K1.0(corto)
     sleep(2.0)                                #K0.1(largo)
 # ---------------------------------------------------------
 def set_params_wqs():

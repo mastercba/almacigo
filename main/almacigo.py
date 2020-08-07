@@ -200,7 +200,7 @@ def process():
             work()
                                                    # mezcla
         if int(hr) in range(10,23,3) and (minu == "00"):
-            mz = servicio.mezclarTanqueAB()
+            mz = servicio.mezclarTanques()
 
         print_date_time()               # LCD1602 date&time
         ds18b20()                    # read&LCD1602 ds18b20

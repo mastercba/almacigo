@@ -31,11 +31,15 @@ def nutreCamas():
         lcdR.puts("!", 2, 1)
         return
     lcdR.puts("m", 2, 1)
+    sleep(2)
     mezclarTanques()
     lcdR.puts("n", 2, 1)
+    sleep(2)
     dosificaAB()
+    sleep(2)
     dosificaAB()
     lcdR.puts("r", 2, 1)
+    sleep(2)
     riego()
     lcdR.puts("*", 2, 1)
 
@@ -64,12 +68,14 @@ def rutinaRiego():
     
     lcdR.puts("m", 2, 1)
     mezclarTanques()
+    sleep(2)
 #    resultado['MZ']['status'] = 'OK!'
 #    resultado['MZ']['horas'] = '21'
 #    resultado['MZ']['minutos'] = '31'
     
     lcdR.puts("n", 2, 1)
     dosificaAB()
+    sleep(2)
 #    resultado['NT']['status'] = 'OK!'
 #    resultado['NT']['horas'] = '22'
 #    resultado['NT']['minutos'] = '32'
@@ -77,17 +83,18 @@ def rutinaRiego():
     mezclarON()
     lcdR.puts("b", 2, 1)
     vaciarBandejas()
+    sleep(2)
 #    resultado['BJ']['status'] = 'OK!'
 #    resultado['BJ']['horas'] = '23'
 #    resultado['BJ']['minutos'] = '33'
     mezclarOFF()
-    
+    sleep(2)
     lcdR.puts("r", 2, 1)
     riego()
 #    resultado['RG']['status'] = 'OK!'
 #    resultado['RG']['horas'] = '24'
 #    resultado['RG']['minutos'] = '34'
-    
+    sleep(2)
     lcdR.puts("*", 2, 1)
 #    return resultado
 # ---------------------------------------------------------
@@ -96,6 +103,7 @@ def regarSMS():
         print('no se pudo llenar tanque de agua')
         return
     mezclarTanques()
+    sleep(2)
     lcdR.puts("#RG", 9, 1)
     riego()
     lcdR.puts("   ", 9, 1)
@@ -163,9 +171,9 @@ def closeValve():
     print('cerramos valvula')
     lcdR.puts(" ", 7, 1)
     servo = PWM(Pin(12), freq = 50, duty=80)
-    sleep(10)# en segundos
+    sleep(2)# en segundos
     servo.deinit()
-    sleep(10)# en segundos
+    sleep(2)# en segundos
     servo = PWM(Pin(12), freq = 50)
     lcdR.puts("c", 7, 1)
 
@@ -173,22 +181,25 @@ def openValve():
     print('abrimos valvula')
     lcdR.puts(" ", 7, 1)
     servo = PWM(Pin(12), freq = 50, duty = 45)
-    sleep(10)# en segundos
+    sleep(2)# en segundos
     servo.deinit()
-    sleep(10)# en segundos
+    sleep(2)# en segundos
     servo = PWM(Pin(12), freq = 50)
     lcdR.puts("o", 7, 1)
 
 def mezclarON():
     print('mezcla ON')
     MZ.off()                             # MZ ON
-
+    sleep(2)
+    
 def mezclarOFF():
     print('mezcla OFF')
     MZ.on()                             # MZ OFF
+    sleep(2)
     
 def riego():
     print('riego')
     RG.off()                             # RG ON
     sleep(240)#60=1minuto
     RG.on()                             # RG OFF
+    sleep(2)
