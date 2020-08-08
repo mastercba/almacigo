@@ -170,6 +170,8 @@ def vaciarBandejas():
 def closeValve():
     print('cerramos valvula')
     lcdR.puts(" ", 7, 1)
+    servo = PWM(Pin(12), freq = 50)
+    sleep(2)# en segundos
     servo = PWM(Pin(12), freq = 50, duty=80)
     sleep(2)# en segundos
     servo.deinit()
@@ -180,6 +182,8 @@ def closeValve():
 def openValve():
     print('abrimos valvula')
     lcdR.puts(" ", 7, 1)
+    servo = PWM(Pin(12), freq = 50)
+    sleep(2)# en segundos
     servo = PWM(Pin(12), freq = 50, duty = 45)
     sleep(2)# en segundos
     servo.deinit()

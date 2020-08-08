@@ -189,10 +189,13 @@ def process():
             #newFirmware()  # CHECK/DOWNLOAD/INSTALL/REBOOT
         
                                            # time to routine
-        if (hr[0] == "0" and hr[1] == "4") and minu == "30":
+        #if (hr[0] == "0" and hr[1] == "4") and minu == "30":
+        #    lcd.puts("w", 2, 1)
+        #    servicio.rutinaRiego()
+        if (int(hr[0])==0 and int(hr[1])==4) and minu == "30":
             lcd.puts("w", 2, 1)
             servicio.rutinaRiego()
-
+        
         sms_rqst = modem.check_sms_rcv()       # data rcved
         vals = list(sms_rqst.values())
         if vals[1] != '0':

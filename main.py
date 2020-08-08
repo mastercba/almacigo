@@ -18,7 +18,7 @@ def start():
 
     # Read version
 #     tag = ota_updater.read_current_version()
-    tag = '4.7'
+    tag = '4.9'
     # Begin MAINcode
     seed = Nursery(tag)
 
